@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -138,7 +139,13 @@ const Categories = () => {
         <div className="container mx-auto px-6 lg:px-16 relative z-10">
 
           {/* Section Header */}
-          <div className="flex flex-col items-center text-center mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center text-center mb-12"
+          >
             <div className="flex items-center gap-3 mb-4">
               <span className="block w-8 h-px bg-yellow-400" />
               <span className="text-yellow-500 text-xs font-semibold uppercase tracking-[0.2em]">
@@ -157,118 +164,170 @@ const Categories = () => {
               Each variety carries its own season, aroma, and story — straight
               from the heart of Pakistan's mango belt.
             </p>
-          </div>
+          </motion.div>
 
-          {/* Loading state */}
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-              <p className="mt-4 text-gray-500 text-sm">Loading categories...</p>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {!loading && formattedCategories.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="text-6xl mb-4">🥭</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Categories Found</h3>
-              <p className="text-gray-400 text-sm">Add mango categories in the Admin Dashboard.</p>
-            </div>
-          )}
-
-          {/* Grid Layouts */}
-          {!loading && formattedCategories.length > 0 && (
-            useSplitLayout ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Left */}
-                <div className="cat-card h-[640px] rounded-2xl">
-                  <img
-                    src={largeCards[0].img}
-                    alt={largeCards[0].name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="cat-overlay" />
-                  <div className="cat-corner" />
-                  <div className="cat-corner-br" />
-                  <div className="cat-content">
-                    {largeCards[0].tag && <span className="cat-tag">{largeCards[0].tag}</span>}
-                    <h2 className="cat-name text-6xl">{largeCards[0].name}</h2>
-                    <p className="cat-subtitle">{largeCards[0].subtitle}</p>
-                    <button className="cat-btn">
-                      Explore <span className="arrow">→</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Center — stacked */}
-                <div className="flex flex-col gap-4">
-                  {smallCards.map((card) => (
-                    <div key={card.id || card.name} className="cat-card h-[308px] rounded-2xl">
+          {/* Loading, Empty and Content Transitions */}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center justify-center py-20"
+              >
+                <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                <p className="mt-4 text-gray-500 text-sm">Loading categories...</p>
+              </motion.div>
+            ) : formattedCategories.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center justify-center py-20 text-center"
+              >
+                <div className="text-6xl mb-4">🥭</div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Categories Found</h3>
+                <p className="text-gray-400 text-sm">Add mango categories in the Admin Dashboard.</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="content"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.12
+                    }
+                  }
+                }}
+              >
+                {useSplitLayout ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Left Column */}
+                    <motion.div 
+                      variants={{
+                        hidden: { opacity: 0, y: 40 },
+                        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
+                      }}
+                      className="cat-card h-[640px] rounded-2xl"
+                    >
                       <img
-                        src={card.img}
-                        alt={card.name}
+                        src={largeCards[0].img}
+                        alt={largeCards[0].name}
                         className="w-full h-full object-cover"
                       />
                       <div className="cat-overlay" />
                       <div className="cat-corner" />
                       <div className="cat-corner-br" />
                       <div className="cat-content">
-                        {card.tag && <span className="cat-tag">{card.tag}</span>}
-                        <h2 className="cat-name text-4xl">{card.name}</h2>
-                        <p className="cat-subtitle">{card.subtitle}</p>
+                        {largeCards[0].tag && <span className="cat-tag">{largeCards[0].tag}</span>}
+                        <h2 className="cat-name text-6xl">{largeCards[0].name}</h2>
+                        <p className="cat-subtitle">{largeCards[0].subtitle}</p>
                         <button className="cat-btn">
                           Explore <span className="arrow">→</span>
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    </motion.div>
 
-                {/* Right */}
-                <div className="cat-card h-[640px] rounded-2xl">
-                  <img
-                    src={largeCards[1].img}
-                    alt={largeCards[1].name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="cat-overlay" />
-                  <div className="cat-corner" />
-                  <div className="cat-corner-br" />
-                  <div className="cat-content">
-                    {largeCards[1].tag && <span className="cat-tag">{largeCards[1].tag}</span>}
-                    <h2 className="cat-name text-6xl">{largeCards[1].name}</h2>
-                    <p className="cat-subtitle">{largeCards[1].subtitle}</p>
-                    <button className="cat-btn">
-                      Explore <span className="arrow">→</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {formattedCategories.map((card) => (
-                  <div key={card.id || card.name} className="cat-card h-[400px] rounded-2xl relative overflow-hidden">
-                    <img
-                      src={card.img}
-                      alt={card.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="cat-overlay" />
-                    <div className="cat-corner" />
-                    <div className="cat-corner-br" />
-                    <div className="cat-content">
-                      {card.tag && <span className="cat-tag">{card.tag}</span>}
-                      <h2 className="cat-name text-4xl">{card.name}</h2>
-                      <p className="cat-subtitle">{card.subtitle}</p>
-                      <button className="cat-btn">
-                        Explore <span className="arrow">→</span>
-                      </button>
+                    {/* Center Column — Stacked */}
+                    <div className="flex flex-col gap-4">
+                      {smallCards.map((card) => (
+                        <motion.div 
+                          key={card.id || card.name}
+                          variants={{
+                            hidden: { opacity: 0, y: 40 },
+                            show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
+                          }}
+                          className="cat-card h-[308px] rounded-2xl"
+                        >
+                          <img
+                            src={card.img}
+                            alt={card.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="cat-overlay" />
+                          <div className="cat-corner" />
+                          <div className="cat-corner-br" />
+                          <div className="cat-content">
+                            {card.tag && <span className="cat-tag">{card.tag}</span>}
+                            <h2 className="cat-name text-4xl">{card.name}</h2>
+                            <p className="cat-subtitle">{card.subtitle}</p>
+                            <button className="cat-btn">
+                              Explore <span className="arrow">→</span>
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
+
+                    {/* Right Column */}
+                    <motion.div 
+                      variants={{
+                        hidden: { opacity: 0, y: 40 },
+                        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
+                      }}
+                      className="cat-card h-[640px] rounded-2xl"
+                    >
+                      <img
+                        src={largeCards[1].img}
+                        alt={largeCards[1].name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="cat-overlay" />
+                      <div className="cat-corner" />
+                      <div className="cat-corner-br" />
+                      <div className="cat-content">
+                        {largeCards[1].tag && <span className="cat-tag">{largeCards[1].tag}</span>}
+                        <h2 className="cat-name text-6xl">{largeCards[1].name}</h2>
+                        <p className="cat-subtitle">{largeCards[1].subtitle}</p>
+                        <button className="cat-btn">
+                          Explore <span className="arrow">→</span>
+                        </button>
+                      </div>
+                    </motion.div>
                   </div>
-                ))}
-              </div>
-            )
-          )}
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {formattedCategories.map((card) => (
+                      <motion.div 
+                        key={card.id || card.name}
+                        variants={{
+                          hidden: { opacity: 0, y: 40 },
+                          show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
+                        }}
+                        className="cat-card h-[400px] rounded-2xl relative overflow-hidden"
+                      >
+                        <img
+                          src={card.img}
+                          alt={card.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="cat-overlay" />
+                        <div className="cat-corner" />
+                        <div className="cat-corner-br" />
+                        <div className="cat-content">
+                          {card.tag && <span className="cat-tag">{card.tag}</span>}
+                          <h2 className="cat-name text-4xl">{card.name}</h2>
+                          <p className="cat-subtitle">{card.subtitle}</p>
+                          <button className="cat-btn">
+                            Explore <span className="arrow">→</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </>
